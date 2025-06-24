@@ -1,0 +1,19 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - traefik
+    volumes:
+      - n8n_data:/home/node/.n8n
+    deploy:
+      mode: replicated
+      replicas: ${N8N_REPLICAS:-1}
+
+networks:
+  traefik:
+    external: true
+
+volumes:
+  n8n_data:

@@ -1,0 +1,406 @@
+= Docker Swarm Stacks
+:toc:
+:toclevels: 2
+
+This project is intended to help developers quickly deploy backing services commonly used during the development cycle.
+
+It contains *Terraform* modules for deploying *Docker* stacks into a *Swarm* cluster. See <<automated-setup>>
+
+It is always possible to run all stacks manually using the `docker stack deploy` command. See <<manual-setup>>.
+
+== Prerequisites
+
+- https://www.docker.com/[Docker]
+
+- https://developer.hashicorp.com/terraform[Terraform]
+
+- https://aws.amazon.com/cli/[AWS CLI]
+
+
+[source, text, title=~/.aws/config]
+----
+[profile localstack]
+region=us-east-1
+output=json
+endpoint_url = http://localhost:4566
+----
+
+[source, text, title=~/.aws/credentials]
+----
+[localstack]
+aws_access_key_id=test
+aws_secret_access_key=test
+----
+
+== Getting started
+[source,shell]
+----
+docker swarm init --task-history-limit=0
+----
+
+[[automated-setup]]
+== Automated Setup
+
+Use Terraform to provision Docker Swarm cluster, deploy stacks, and manage resources.
+
+Service deployments and replica counts are controlled dynamically using the *Terraform* `replicas` map
+variable, defined in link:variables.tf[`variables.tf`], which specifies how many instances of each service should run.
+
+[source,shell]
+----
+terraform init
+----
+
+=== Plan
+
+[source,shell]
+----
+terraform plan
+----
+
+=== Deploy
+
+[source,shell]
+----
+terraform apply
+----
+
+=== Destroy
+
+[source,shell]
+----
+terraform destroy
+----
+
+[IMPORTANT]
+====
+The default configuration contains placeholder values.
+Create a *variables.tfvars* file to override these with real secrets for not local deployment.
+====
+
+=== Modules
+==== Docker Swarm Stack
+Manages _Docker Stack_ deployment with secrets and dynamic service replicas.
+
+_Terraform_ resource updates relies on the stack _Compose_ file or stack config change.
+
+[[manual-setup]]
+== Manual Setup
+
+Manually provision Docker Swarm cluster and manage resources. See <<stacks>>.
+
+The required number of service instances must be configured using environment variables.
+
+[[stacks]]
+== Stacks
+
+.Stacks
+[frame=none,%autowidth]
+|===
+|Stack |URL | Compose file | Services
+
+|<<traefik>> | http://localhost:8080 +
+http://localhost/whoami | link:docker-compose.traefik.yml[] | Traefik +
+whoami
+
+|<<nginx>> | http://localhost:7233 | link:docker-compose.nginx.yml[] | NGINX
+
+|<<portainer>> | http://localhost:9000 +
+http://localhost/portainer | link:docker-compose.portainer.yml[] | Portainer CE +
+Portainer Agent
+
+|<<postgres>> | http://localhost:5432 | link:docker-compose.postgres.yml[] | Postgres
+
+|<<mongo>> | http://localhost:27017 | link:docker-compose.mongo.yml[] | Mongo
+
+|<<redis>> | http://localhost:6379 | link:docker-compose.redis.yml[] | Redis
+
+|<<influxdb>> | http://localhost:8086 | link:docker-compose.influxdb.yml[] | InfluxDB 2
+
+|<<neo4j>> | http://localhost:7474 +
+http://localhost:7687 | link:docker-compose.neo4j.yml[] | Neo4j
+
+|<<keycloak>> | http://localhost/keycloak/auth/ | link:docker-compose.keycloak.yml[] | Keycloak
+
+|<<kafka>> | http://localhost:9092 | link:docker-compose.kafka.yml[] | Kafka
+
+|<<maildev>> | http://localhost:1080 | link:docker-compose.maildev.yml[] | MailDev
+
+|<<temporal>> | http://localhost:8081/temporal/ | link:docker-compose.temporal.yml[] | Temporal History +
+Temporal Matching +
+Temporal Frontend
+Temporal Worker
+Temporal UI
+
+|<<n8n>> | http://localhost:5678 | link:docker-compose.n8n.yml[] | n8n
+
+|<<localstack>> | http://localhost:4566 | link:docker-compose.localstack.yml[] | S3 +
+IAM +
+STS
+
+|<<prometheus>> | http://localhost:9090 | link:docker-compose.prometheus.yml[] | Prometheus
+
+|<<grafana>> | http://localhost:3000 +
+http://localhost:3100 +
+http://localhost:3200 | link:docker-compose.grafana.yml[] | Grafana +
+Loki +
+Tempo +
+Promtail +
+
+|===
+
+[[traefik]]
+=== https://traefik.io/traefik[Traefik]
+Reverse Proxy
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.traefik.yml traefik
+----
+
+==== Whoami
+Tiny Go webserver that prints OS information and HTTP request to output, ideal for testing.
+
+[[nginx]]
+=== https://nginx.org[NGINX]
+Reverse Proxy
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.nginx.yml nginx
+----
+
+[[portainer]]
+=== https://www.portainer.io/[Portainer]
+Container Management
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.portainer.yml portainer
+----
+
+[[postgres]]
+=== https://www.postgresql.org/[PostgreSQL]
+Relational Database
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.postgres.yml postgres
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "postgres" | docker secret create postgres-user -
+----
+
+[source,shell]
+----
+echo "postgres" | docker secret create postgres-password -
+----
+
+[[mongo]]
+=== https://www.mongodb.com/[MongoDB]
+No SQL Document Database
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.mongo.yml mongo
+----
+
+==== Secrets
+
+[source,shell]
+----
+openssl rand -base64 756 | docker secret create mongo-keyfile -
+----
+
+[source,shell]
+----
+echo "mongo" | docker secret create mongo-username -
+----
+
+[source,shell]
+----
+echo "mongo" | docker secret create mongo-password -
+----
+
+[[redis]]
+=== https://redis.io/[Redis]
+In memory data store
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.redis.yml redis
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "redis" | docker secret create redis-username -
+----
+
+[source,shell]
+----
+echo "redis" | docker secret create redis-password -
+----
+
+[[influxdb]]
+=== https://www.influxdata.com/[InfluxDB]
+Time Series Database
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.influxdb.yml influxdb
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "influxdb" | docker secret create influxdb-username -
+----
+
+[source,shell]
+----
+echo "influxdb" | docker secret create influxdb-password -
+----
+
+[[neo4j]]
+=== https://neo4j.com/[Neo4j]
+Graph Database
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.neo4j.yml neo4j
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "neo4j/your_password" | docker secret create neo4j-auth -
+----
+
+[[keycloak]]
+=== https://www.keycloak.org/[Keycloak]
+Identity and Access Management
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.keycloak.yml keycloak
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "keycloak" | docker secret create keycloak-admin-username -
+----
+
+[source,shell]
+----
+echo "keycloak" | docker secret create keycloak-admin-password -
+----
+
+[[kafka]]
+=== https://kafka.apache.org/[Kafka]
+Messaging system streaming platform
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.kafka.yml kafka
+----
+
+[[maildev]]
+=== https://github.com/maildev/maildev[MailDev]
+SMTP Server
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.maildev.yml maildev
+----
+
+==== Secrets
+
+[source,shell]
+----
+echo "maildev" | docker secret create maildev-username -
+----
+
+[source,shell]
+----
+echo "maildev" | docker secret create maildev-password -
+----
+
+[[temporal]]
+=== https://temporal.io/[Temporal]
+Execution platform
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.temporal.yml temporal
+----
+
+[[n8n]]
+=== https://n8n.io/[n8n]
+Workflow automation
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.n8n.yml n8n
+----
+
+[[localstack]]
+=== https://www.localstack.cloud/[LocalStack]
+Local AWS Services
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.localstack.yml localstack
+----
+
+[[prometheus]]
+=== https://prometheus.io/[Prometheus]
+Monitoring and alerting toolkit
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.prometheus.yml prometheus
+----
+
+[[grafana]]
+=== https://grafana.com/[Grafana]
+Observability
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.grafana.yml grafana
+----
+
+== Conventions
+- Compose file name `docker-compose.<stack>.yml`
+- *Docker Compose* file order `x-templates`, `services`, `networks`, `volumes`, `secrets` and `deploy`
+- Use `example.com` (RFC 2606 reserved for testing and documentation)
+- Terraform *main.tf* order `data`, `locals`, `resource`, `module`
+
+== Aliases
+
+**Zsh** (`~/.zshrc`)
+
+[source,text]
+----
+# Docker aliases
+alias d='docker'
+alias dc='docker compose'
+
+# Terraform aliases
+alias tf='terraform'
+alias tfi='terraform init'
+alias tfp='terraform plan'
+alias tfa='terraform apply'
+alias tfd='terraform destroy'
+alias tfs='terraform show'
+alias tfv='terraform validate'
+----
