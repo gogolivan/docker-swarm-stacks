@@ -192,7 +192,7 @@ module "neo4j_stack" {
 }
 
 module "keycloak_stack" {
-  count = var.stack_service_replicas_env_config.KEYCLOAK_REPLICAS > 1 ? 1 : 0
+  count = var.stack_service_replicas_env_config.KEYCLOAK_REPLICAS > 0 ? 1 : 0
 
   source = "./modules/docker-swarm-stack"
 
@@ -331,4 +331,46 @@ module "grafana_stack" {
   }
 
   depends_on = [module.prometheus_stack]
+}
+
+module "loki_stack" {
+  count = var.stack_service_replicas_env_config.LOKI_REPLICAS > 0 ? 1 : 0
+
+  source = "./modules/docker-swarm-stack"
+
+  stack_name   = "loki"
+  compose_file = "docker-compose.loki.yml"
+  replicas = {
+    LOKI_REPLICAS = var.stack_service_replicas_env_config.LOKI_REPLICAS
+  }
+
+  depends_on = [module.grafana_stack]
+}
+
+module "tempo_stack" {
+  count = var.stack_service_replicas_env_config.TEMPO_REPLICAS > 0 ? 1 : 0
+
+  source = "./modules/docker-swarm-stack"
+
+  stack_name   = "tempo"
+  compose_file = "docker-compose.tempo.yml"
+  replicas = {
+    TEMPO_REPLICAS = var.stack_service_replicas_env_config.TEMPO_REPLICAS
+  }
+
+  depends_on = [module.grafana_stack, module.prometheus_stack]
+}
+
+module "promtail_stack" {
+  count = var.stack_service_replicas_env_config.PROMTAIL_REPLICAS > 0 ? 1 : 0
+
+  source = "./modules/docker-swarm-stack"
+
+  stack_name   = "promtail"
+  compose_file = "docker-compose.promtail.yml"
+  replicas = {
+    PROMTAIL_REPLICAS = var.stack_service_replicas_env_config.PROMTAIL_REPLICAS
+  }
+
+  depends_on = [module.grafana_stack, module.prometheus_stack]
 }

@@ -21,6 +21,9 @@ variable "stack_service_replicas_env_config" {
     LOCALSTACK_REPLICAS = 1
     PROMETHEUS_REPLICAS = 1
     GRAFANA_REPLICAS    = 1
+    LOKI_REPLICAS       = 1
+    TEMPO_REPLICAS      = 1
+    PROMTAIL_REPLICAS   = 1
   }
 }
 

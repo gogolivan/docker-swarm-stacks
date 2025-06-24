@@ -1,0 +1,31 @@
+services:
+  tempo:
+    image: grafana/tempo:main-7227c90
+    hostname: tempo
+    depends_on:
+      - grafana
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo/tempo.yaml:/etc/tempo.yaml
+    ports:
+      - "14268:14268" # Jaeger Thrift Http
+      - "14250:1425"  # Jaeger Grpc
+      - "3200:3200"   # Tempo Http
+      - "9095:9095"   # Tempo grpc
+      - "4317:4317"   # otlp grpc
+      - "4318:4318"   # otlp http
+      - "9411:9411"   # Zipkin
+    networks:
+      grafana:
+        aliases:
+          - tempo
+      prometheus:
+    deploy:
+      mode: replicated
+      replicas: ${TEMPO_REPLICAS:-1}
+
+networks:
+  grafana:
+    external: true
+  prometheus:
+    external: true

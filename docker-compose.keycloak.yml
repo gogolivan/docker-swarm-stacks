@@ -9,7 +9,9 @@ services:
     command: >
       "export KC_BOOTSTRAP_ADMIN_USERNAME=$$(cat /run/secrets/keycloak-admin-username)
        export KC_BOOTSTRAP_ADMIN_PASSWORD=$$(cat /run/secrets/keycloak-admin-password)
-       /opt/keycloak/bin/kc.sh start-dev"
+       /opt/keycloak/bin/kc.sh start-dev --import-realm"
+    volumes:
+      - ./config/keycloak/import:/opt/keycloak/data/import
     networks:
       - traefik
     secrets:
