@@ -16,6 +16,8 @@ It is always possible to run all stacks manually using the `docker stack deploy`
 
 - https://aws.amazon.com/cli/[AWS CLI]
 
+- Go[https://go.dev/]
+
 
 [source, text, title=~/.aws/config]
 ----
@@ -383,6 +385,14 @@ Observability
 [source,shell]
 ----
 docker stack deploy --resolve-image changed -c docker-compose.grafana.yml grafana
+----
+
+== Testing
+Terratest[https://terratest.gruntwork.io/docs/getting-started/quick-start/]
+
+[source,shell]
+----
+cd test && go test -v
 ----
 
 == Conventions
