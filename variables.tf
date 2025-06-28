@@ -12,7 +12,7 @@ variable "stack_service_replicas_env_config" {
     POSTGRES_REPLICAS   = 1
     REDIS_REPLICAS      = 1
     INFLUXDB_REPLICAS   = 1
-    NEO4J_REPLICAS      = 0
+    NEO4J_REPLICAS      = 1
     KEYCLOAK_REPLICAS   = 1
     KAFKA_REPLICAS      = 0
     MAILDEV_REPLICAS    = 1

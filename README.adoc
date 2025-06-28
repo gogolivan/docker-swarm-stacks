@@ -97,55 +97,61 @@ The required number of service instances must be configured using environment va
 .Stacks
 [frame=none,%autowidth]
 |===
-|Stack |URL | Compose file | Services
+|Stack |URL | Compose file | Services | Environment Variables
 
 |<<traefik>> | http://localhost:8080 +
 http://localhost/whoami | link:docker-compose.traefik.yml[] | Traefik +
-whoami
+whoami |
 
-|<<nginx>> | http://localhost:7233 | link:docker-compose.nginx.yml[] | NGINX
+|<<nginx>> | http://localhost:7233 | link:docker-compose.nginx.yml[] | NGINX |
 
 |<<portainer>> | http://localhost:9000 +
 http://localhost/portainer | link:docker-compose.portainer.yml[] | Portainer CE +
-Portainer Agent
+Portainer Agent |
 
-|<<postgres>> | http://localhost:5432 | link:docker-compose.postgres.yml[] | Postgres
+|<<postgres>> | http://localhost:5432 | link:docker-compose.postgres.yml[] | Postgres | POSTGRES_REPLICAS
 
-|<<mongo>> | http://localhost:27017 | link:docker-compose.mongo.yml[] | Mongo
+|<<mongo>> | http://localhost:27017 | link:docker-compose.mongo.yml[] | Mongo | MONGO1_REPLICAS +
+MONGO2_REPLICAS +
+MONGO3_REPLICAS +
+MONGO_INIT_REPLICAS
 
-|<<redis>> | http://localhost:6379 | link:docker-compose.redis.yml[] | Redis
+|<<redis>> | http://localhost:6379 | link:docker-compose.redis.yml[] | Redis | REDIS_REPLICAS
 
-|<<influxdb>> | http://localhost:8086 | link:docker-compose.influxdb.yml[] | InfluxDB 2
+|<<influxdb>> | http://localhost:8086 | link:docker-compose.influxdb.yml[] | InfluxDB 2 | INFLUXDB_REPLICAS
 
 |<<neo4j>> | http://localhost:7474 +
-http://localhost:7687 | link:docker-compose.neo4j.yml[] | Neo4j
+http://localhost:7687 | link:docker-compose.neo4j.yml[] | Neo4j | NEO4J_REPLICAS
 
-|<<keycloak>> | http://localhost/keycloak/auth/ | link:docker-compose.keycloak.yml[] | Keycloak
+|<<keycloak>> | http://localhost/keycloak/auth/ | link:docker-compose.keycloak.yml[] | Keycloak | KEYCLOAK_REPLICAS
 
-|<<kafka>> | http://localhost:9092 | link:docker-compose.kafka.yml[] | Kafka
+|<<kafka>> | http://localhost:9092 | link:docker-compose.kafka.yml[] | Kafka | KAFKA_REPLICAS
 
-|<<maildev>> | http://localhost:1080 | link:docker-compose.maildev.yml[] | MailDev
+|<<maildev>> | http://localhost:1080 | link:docker-compose.maildev.yml[] | MailDev | MAILDEV_REPLICAS
 
 |<<temporal>> | http://localhost:8081/temporal/ | link:docker-compose.temporal.yml[] | Temporal History +
 Temporal Matching +
 Temporal Frontend
 Temporal Worker
-Temporal UI
+Temporal UI | TEMPORAL_REPLICAS
 
-|<<n8n>> | http://localhost:5678 | link:docker-compose.n8n.yml[] | n8n
+|<<n8n>> | http://localhost:5678 | link:docker-compose.n8n.yml[] | n8n | N8N_REPLICAS
 
 |<<localstack>> | http://localhost:4566 | link:docker-compose.localstack.yml[] | S3 +
 IAM +
-STS
+STS | LOCALSTACK_REPLICAS
 
-|<<prometheus>> | http://localhost:9090 | link:docker-compose.prometheus.yml[] | Prometheus
+|<<prometheus>> | http://localhost:9090 | link:docker-compose.prometheus.yml[] | Prometheus | PROMETHEUS_REPLICAS
 
 |<<grafana>> | http://localhost:3000 +
 http://localhost:3100 +
 http://localhost:3200 | link:docker-compose.grafana.yml[] | Grafana +
 Loki +
 Tempo +
-Promtail +
+Promtail | GRAFANA_REPLICAS +
+LOKI_REPLICAS +
+TEMPO_REPLICAS +
+PROMTAIL_REPLICAS
 
 |===
 
