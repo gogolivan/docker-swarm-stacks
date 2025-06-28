@@ -147,7 +147,10 @@ STS | LOCALSTACK_REPLICAS
 
 |<<grafana>> | http://localhost:3000 +
 http://localhost:3100 +
-http://localhost:3200 | link:docker-compose.grafana.yml[] | Grafana +
+http://localhost:3200 | link:docker-compose.grafana.yml[] +
+link:docker-compose.loki.yml[] +
+link:docker-compose.tempo.yml[] +
+link:docker-compose.promtail.yml[] | Grafana +
 Loki +
 Tempo +
 Promtail | GRAFANA_REPLICAS +
@@ -386,6 +389,22 @@ Observability
 ----
 docker stack deploy --resolve-image changed -c docker-compose.grafana.yml grafana
 ----
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.loki.yml loki
+----
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.tempo.yml tempo
+----
+
+[source,shell]
+----
+docker stack deploy --resolve-image changed -c docker-compose.promtail.yml promtail
+----
+
 
 == Testing
 https://terratest.gruntwork.io/docs/getting-started/quick-start/[Terratest]
