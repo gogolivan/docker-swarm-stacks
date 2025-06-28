@@ -4,7 +4,7 @@ datasources:
     type: loki
     access: proxy
     orgId: 1
-    url: http://loki_loki:3100
+    url: http://grafana_loki:3100
     basicAuth: false
     isDefault: true
     version: 1
@@ -13,7 +13,7 @@ datasources:
     type: tempo
     access: proxy
     orgId: 1
-    url: http://tempo_tempo:3200
+    url: http://grafana_tempo:3200
     basicAuth: false
     version: 1
     editable: true
