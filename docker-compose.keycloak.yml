@@ -10,6 +10,8 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
     entrypoint: [ "/bin/bash", "-c" ]
+    # Keycloak does not support the *_FILE suffix for environment variables.
+    # To use Docker Secrets, values must be manually read and exported as environment variables.
     command: >
       "export KC_BOOTSTRAP_ADMIN_USERNAME=$$(cat /run/secrets/keycloak-admin-username)
        export KC_BOOTSTRAP_ADMIN_PASSWORD=$$(cat /run/secrets/keycloak-admin-password)
