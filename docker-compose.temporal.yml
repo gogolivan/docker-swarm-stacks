@@ -1,61 +1,78 @@
+x-temporal-network: &temporal-network
+  networks:
+    - temporal
+    - postgres
+    - nginx
+
+x-temporal-secrets: &temporal-secrets
+  secrets:
+    - postgres-user
+    - postgres-password
+
+x-temporal-base-server: &temporal-base-server
+  image: temporalio/server:1.27.2.0
+  entrypoint: [ "/bin/bash", "-c" ]
+  command: >
+    "export DB=postgres12
+     export DB_PORT=5432
+     export POSTGRES_SEEDS=postgres_postgres
+     export POSTGRES_USER=$$(cat /run/secrets/postgres-user)
+     export POSTGRES_PWD=$$(cat /run/secrets/postgres-password)
+     /etc/temporal/entrypoint.sh"
+  <<:
+   - *temporal-network
+   - *temporal-secrets
+
+x-temporal-base-auto-setup: &temporal-base-auto-setup
+  image: temporalio/auto-setup:1.27.2.0 # use temporalio/auto-setup to automatically setup DB schema and namespaces
+  entrypoint: [ "/bin/bash", "-c" ]
+  command: >
+    "export DB=postgres12
+     export DB_PORT=5432
+     export POSTGRES_SEEDS=postgres_postgres
+     export POSTGRES_USER=$$(cat /run/secrets/postgres-user)
+     export POSTGRES_PWD=$$(cat /run/secrets/postgres-password)
+     /etc/temporal/entrypoint.sh autosetup"
+  <<:
+    - *temporal-network
+    - *temporal-secrets
+
 services:
   temporal-history:
-    image: temporalio/auto-setup:1.27.2.0 # use temporalio/auto-setup to automatically setup DB schema and namespaces
+    <<: *temporal-base-auto-setup
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PWD=postgres
-      - POSTGRES_SEEDS=postgres_postgres
       - SERVICES=history
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_ADDRESS=nginx_nginx:7233
     ports:
       - "7234:7234"
-    networks:
-      - temporal
-      - postgres
-      - nginx
     deploy:
       mode: replicated
       replicas: ${TEMPORAL_REPLICAS:-1}
 
   temporal-matching:
-    image: temporalio/server:1.27.2.0
+    <<: *temporal-base-server
     depends_on:
       - temporal-history
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PWD=postgres
-      - POSTGRES_SEEDS=postgres_postgres
       - SERVICES=matching
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_ADDRESS=nginx_nginx:7233
     ports:
       - "7235:7235"
-    networks:
-      - temporal
-      - postgres
-      - nginx
+
     deploy:
       mode: replicated
       replicas: ${TEMPORAL_REPLICAS:-1}
 
   temporal-frontend:
-    image: temporalio/server:1.27.2.0
+    <<: *temporal-base-server
     depends_on:
       - temporal-matching
     hostname: temporal
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PWD=postgres
-      - POSTGRES_SEEDS=postgres_postgres
       - SERVICES=frontend
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
@@ -67,33 +84,25 @@ services:
       postgres:
       nginx:
         aliases:
-          - temporal # Allow nginx to resolve 'temporal' to 'temporal-frontend' in nginx.conf upstream block.
-                     # Needed because Docker Swarm adds stack name with underscores, causing DNS issues.
+          # Allow nginx to resolve 'temporal' to 'temporal-frontend' in nginx.conf upstream block.
+          # Needed because Docker Swarm adds stack name with underscores, causing DNS issues.
+          - temporal
     deploy:
       mode: replicated
       replicas: ${TEMPORAL_REPLICAS:-1}
       endpoint_mode: dnsrr
 
   temporal-worker:
-    image: temporalio/server:1.27.2.0
+    <<: *temporal-base-server
     depends_on:
       - temporal-frontend
     environment:
-      - DB=postgres12
-      - DB_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PWD=postgres
-      - POSTGRES_SEEDS=postgres_postgres
       - SERVICES=worker
       - TEMPORAL_HISTORY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_VISIBILITY_NAMESPACEDEFAULT_ARCHIVAL_FILESTORE=enabled
       - TEMPORAL_ADDRESS=nginx_nginx:7233
     ports:
       - "7232:7232"
-    networks:
-      - temporal
-      - postgres
-      - nginx
     deploy:
       mode: replicated
       replicas: ${TEMPORAL_REPLICAS:-1}
@@ -134,4 +143,10 @@ networks:
   postgres:
     external: true
   nginx:
+    external: true
+
+secrets:
+  postgres-user:
+    external: true
+  postgres-password:
     external: true

@@ -213,7 +213,9 @@ module "keycloak_stack" {
     }
   }
 
-  depends_on = [module.traefik_stack]
+  wait_for = ["postgres"]
+
+  depends_on = [module.traefik_stack, module.postgres_stack]
 }
 
 module "kafka_stack" {

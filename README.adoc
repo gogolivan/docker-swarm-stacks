@@ -297,6 +297,8 @@ Identity and Access Management
 docker stack deploy --resolve-image changed -c docker-compose.keycloak.yml keycloak
 ----
 
+A *test* realm and *admin* user with password *admin* is automatically from `./config/keycloak/import`.
+
 ==== Secrets
 
 [source,shell]
