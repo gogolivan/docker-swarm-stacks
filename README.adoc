@@ -38,10 +38,12 @@ aws_secret_access_key=test
 ==== Plugins
 ===== IntelliJ IDEA
 - https://plugins.jetbrains.com/plugin/7808-terraform-and-hcl[Terraform and HCL]
+- https://plugins.jetbrains.com/bundles/5-go-bundle[Go bundle]
 
 ===== Visual Studio Code
 - https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker[Docker]
 - https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform[HashiCorp Terraform]
+- https://marketplace.visualstudio.com/items?itemName=golang.Go[Go]
 
 == Getting started
 [source,shell]
